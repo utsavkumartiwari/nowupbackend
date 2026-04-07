@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+co
 const path = require('path');
 
 const authRoutes = require('./routes/authRoutes');
@@ -28,6 +29,9 @@ app.use('/api/news', newsRoutes);
 app.use('/api/category', require('./routes/categoryRoutes'));
 app.use('/api', videoRoutes);
 app.use('/api/shorts', require('./routes/shortVideoRoutes'));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected:", mongoose.connection.name))
+  .catch((err) => console.log("❌ Database Connection Error:", err));
 
 // ✅ DB + Server start
 const PORT = process.env.PORT || 5000;

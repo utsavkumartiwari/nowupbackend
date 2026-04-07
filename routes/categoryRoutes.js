@@ -15,6 +15,8 @@ router.delete('/delete/:id', catController.deleteCategory);
 // 2. Category ka Naam Edit karne ke liye (Main Category)
 router.put('/update/:id', catController.updateCategory);
 
+router.put('/update-sub/:subId', catController.updateSubCategory);
+
 // 3. Sub-Category ko Delete karne ke liye (Optional par zaroori hai)
 // Isme Category ID aur Sub-Category ID dono ki zaroorat padegi
 router.delete('/delete-sub/:catId/:subId', catController.deleteSubCategory);

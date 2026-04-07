@@ -1,29 +1,14 @@
 const mongoose = require('mongoose');
 
 const CategorySchema = new mongoose.Schema({
-    // Main Category ka naam (e.g., Rajniti)
-    name: { 
-        type: String, 
-        required: true, 
-        unique: true,
-        trim: true 
-    },
-    // Sub-categories ka array (e.g., UP Rajniti, Bihar Rajniti)
-    subCategories: [
-        { 
-            name: { 
-                type: String,
-                trim: true
-            },
-            // Har sub-category ki apni unique ID automatic ban jayegi
-            createdAt: {
-                type: Date,
-                default: Date.now
-            }
-        }
-    ]
-}, { 
-    timestamps: true // Isse pata chalega category kab bani
+    id: {type: String, required: true},
+    name: {type: String, required: true, trim: true},
+    slug_url: {type: String, required: true, unique: true, trim: true},
+    status: {type: String, default: "1"},
+    seo_content: {type: String, default: null },
+    image1: {type: String, default: null},
+    created_at: {type: String},
+    updated_at: {type: String}
 });
 
 module.exports = mongoose.model('Category', CategorySchema);

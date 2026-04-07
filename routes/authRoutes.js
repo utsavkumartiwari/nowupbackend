@@ -30,6 +30,16 @@ router.post('/register', verifyAdmin, async (req, res) => {
     }
 });
 
+// 4. Get All Authors
+router.get('/authors', verifyAdmin, async (req, res) => {
+    try {
+        const authors = await User.find({ role: 'author' }).select('-password');
+        res.json(authors);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 2. Login Route
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;

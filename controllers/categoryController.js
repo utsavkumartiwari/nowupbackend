@@ -1,178 +1,183 @@
 const Category = require('../models/Category');
+const SubCategory = require('../models/SubCategory');
 
 
-// 1. Saari Categories lana
+// ===================== CATEGORY =====================
+
+// ✅ GET ALL (WITH SUBCATEGORY)
 exports.getAllCategories = async (req, res) => {
-    try {
-        const categories = await Category.find();
-        res.json(categories);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const categories = await Category.find({ status: "1" }).lean();
+    const subCategories = await SubCategory.find({ status: "1" }).lean();
+
+    const finalData = categories.map(cat => {
+      const subs = subCategories.filter(
+        sub => String(sub.category_id) === String(cat.id)
+      );
+
+      return {
+        ...cat,
+        subCategories: subs
+      };
+    });
+
+    res.json({
+      success: true,
+      data: finalData
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 2. Nayi Category add karna
+
+// ✅ ADD CATEGORY
 exports.addCategory = async (req, res) => {
-    try {
-        const newCat = new Category({ name: req.body.name });
-        await newCat.save();
-        res.status(201).json(newCat);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+
+    // 🔥 LAST CATEGORY FIND KARO
+    const lastCategory = await Category.findOne().sort({ _id: -1 });
+
+    const newId = lastCategory ? (parseInt(lastCategory.id) + 1).toString() : "1";
+
+    const category = new Category({
+      id: newId,
+      name: req.body.name,
+      slug_url: req.body.slug_url,
+      status: "1",
+      seo_content: null,
+      image1: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+    await category.save();
+
+    res.status(201).json({
+      success: true,
+      data: category
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 3. Main Category Update (Edit) karna
+
+// ✅ UPDATE CATEGORY
 exports.updateCategory = async (req, res) => {
-    try {
-        const updatedCat = await Category.findByIdAndUpdate(
-            req.params.id, 
-            { name: req.body.name }, 
-            { new: true }
-        );
-        res.status(200).json(updatedCat);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const updated = await Category.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        updated_at: new Date().toISOString()
+      },
+      { new: true }
+    );
+
+    res.json({ success: true, data: updated });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 4. Main Category Delete karna
+
+// ✅ DELETE CATEGORY
 exports.deleteCategory = async (req, res) => {
-    try {
-        await Category.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Category Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const cat = await Category.findById(req.params.id);
+
+    // SubCategory bhi delete karo
+    await SubCategory.deleteMany({ category_id: cat.id });
+
+    await Category.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: "Category + SubCategory deleted"
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 5. Sub-category add karna
+
+
+// ===================== SUB CATEGORY =====================
+
+// ✅ ADD SUBCATEGORY
 exports.addSubCategory = async (req, res) => {
-    try {
-        const category = await Category.findById(req.params.id);
-        category.subCategories.push({ name: req.body.name });
-        await category.save();
-        res.json(category);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+
+    // 🔥 LAST SUBCATEGORY FIND KARO
+    const lastSub = await SubCategory.findOne().sort({ _id: -1 });
+
+    const newId = lastSub ? (parseInt(lastSub.id) + 1).toString() : "1";
+
+    const sub = new SubCategory({
+      id: newId,
+      user_id: "1",
+      category_id: req.params.id,
+      name: req.body.name,
+      slug_url_subcat: req.body.slug_url_subcat,
+      seo_content: null,
+      status: "1",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+    await sub.save();
+
+    res.status(201).json({
+      success: true,
+      data: sub
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 6. Sub-Category Update (Edit) karna
+
+// ✅ UPDATE SUBCATEGORY
 exports.updateSubCategory = async (req, res) => {
-    try {
-        const { catId, subId } = req.params;
-        const category = await Category.findById(catId);
-        
-        const subCat = category.subCategories.id(subId);
-        if (!subCat) return res.status(404).json({ message: "Sub-category nahi mili" });
-        
-        subCat.name = req.body.newName;
-        await category.save();
-        
-        res.status(200).json({ message: "Sub-Category Updated", category });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const updated = await SubCategory.findByIdAndUpdate(
+      req.params.subId,
+      {
+        ...req.body,
+        updated_at: new Date().toISOString()
+      },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: "SubCategory updated",
+      data: updated
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-// 7. Sub-Category Delete karna
+
+// ✅ DELETE SUBCATEGORY
 exports.deleteSubCategory = async (req, res) => {
-    try {
-        const { catId, subId } = req.params;
-        await Category.findByIdAndUpdate(catId, {
-            $pull: { subCategories: { _id: subId } }
-        });
-        res.status(200).json({ message: "Sub-Category Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+  try {
+    await SubCategory.findByIdAndDelete(req.params.subId);
 
-// 1. Saari Categories lana
-exports.getAllCategories = async (req, res) => {
-    try {
-        const categories = await Category.find();
-        res.json(categories);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+    res.json({
+      success: true,
+      message: "SubCategory deleted"
+    });
 
-// 2. Nayi Category add karna
-exports.addCategory = async (req, res) => {
-    try {
-        const newCat = new Category({ name: req.body.name });
-        await newCat.save();
-        res.status(201).json(newCat);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 3. Main Category Update (Edit) karna
-exports.updateCategory = async (req, res) => {
-    try {
-        const updatedCat = await Category.findByIdAndUpdate(
-            req.params.id, 
-            { name: req.body.name }, 
-            { new: true }
-        );
-        res.status(200).json(updatedCat);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 4. Main Category Delete karna
-exports.deleteCategory = async (req, res) => {
-    try {
-        await Category.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Category Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 5. Sub-category add karna
-exports.addSubCategory = async (req, res) => {
-    try {
-        const category = await Category.findById(req.params.id);
-        category.subCategories.push({ name: req.body.name });
-        await category.save();
-        res.json(category);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 6. Sub-Category Update (Edit) karna
-exports.updateSubCategory = async (req, res) => {
-    try {
-        const { catId, subId } = req.params;
-        const category = await Category.findById(catId);
-        
-        const subCat = category.subCategories.id(subId);
-        if (!subCat) return res.status(404).json({ message: "Sub-category nahi mili" });
-        
-        subCat.name = req.body.newName;
-        await category.save();
-        
-        res.status(200).json({ message: "Sub-Category Updated", category });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// 7. Sub-Category Delete karna
-exports.deleteSubCategory = async (req, res) => {
-    try {
-        const { catId, subId } = req.params;
-        await Category.findByIdAndUpdate(catId, {
-            $pull: { subCategories: { _id: subId } }
-        });
-        res.status(200).json({ message: "Sub-Category Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };

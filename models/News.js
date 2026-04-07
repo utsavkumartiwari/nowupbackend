@@ -2,21 +2,32 @@ const mongoose = require('mongoose');
 
 const newsSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    shortTitle: { type: String },
-    slugUrl: { type: String, unique: true },
-    summary: { type: String },
+
+    short_description: { type: String },
+    slug: { type: String, unique: true },
+
     description: { type: String, required: true },
-    category: { type: String, required: true },
-    subCategory: { type: String },
-    date: { type: String, required: true },
+
+    category_id: { type: String, required: true },
+    sub_category_id: { type: String },
+
     tags: { type: String },
-    speciality: { type: String },
-    reporter: { type: String },
-    status: { type: String, default: 'Active' },
-    breakingNews: { type: String, default: 'No' },
+
+    user_id: { type: String },
+
+    status: { type: String, default: '1' },
+
     image: { type: String },
-    metaKeyword: { type: String },
-    metaDescription: { type: String }
+
+    meta_keyword: { type: String },
+    meta_description: { type: String },
+
+    is_featured: { type: String, default: '0' },
+    trending: { type: String, default: '0' },
+    views: { type: String, default: '0' },
+
+    admin_check: { type: String, default: '1' }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('News', newsSchema);

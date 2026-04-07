@@ -85,7 +85,16 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const news = await News.findById(id).lean();
+    let news;
+
+    const mongoose = require('mongoose');
+
+    // 👇 check karo id hai ya slug
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      news = await News.findById(id).lean();
+    } else {
+      news = await News.findOne({ slug: id }).lean();
+    }
 
     if (!news) {
       return res.status(404).json({ message: "News not found" });
@@ -101,11 +110,9 @@ router.get('/:id', async (req, res) => {
 
     let author_name = "Unknown";
 
-    // OLD
     if (oldUserMap[news.user_id]) {
       author_name = oldUserMap[news.user_id];
     } else {
-      // NEW
       const user = users.find(
         u => u._id.toString() === news.user_id
       );
@@ -122,7 +129,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: "Error fetching news" });
   }
 });
-
 
 // 3. Add News Route
 // 3. Add News Route (UPDATED)

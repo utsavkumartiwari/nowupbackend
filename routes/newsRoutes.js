@@ -80,56 +80,6 @@ router.get('/all', async (req, res) => {
     res.status(500).json({ message: "Error" });
   }
 });
-
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    let news;
-
-    const mongoose = require('mongoose');
-
-    // 👇 check karo id hai ya slug
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      news = await News.findById(id).lean();
-    } else {
-      news = await News.findOne({ slug: id }).lean();
-    }
-
-    if (!news) {
-      return res.status(404).json({ message: "News not found" });
-    }
-
-    const User = require('../models/User');
-    const users = await User.find().lean();
-
-    const oldUserMap = {
-      "1": "Shiv Vishwakarma",
-      "9": "Shiv Vishwakarma"
-    };
-
-    let author_name = "Unknown";
-
-    if (oldUserMap[news.user_id]) {
-      author_name = oldUserMap[news.user_id];
-    } else {
-      const user = users.find(
-        u => u._id.toString() === news.user_id
-      );
-      author_name = user ? user.name : "Unknown";
-    }
-
-    res.json({
-      ...news,
-      author_name
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching news" });
-  }
-});
-
 // 3. Add News Route
 // 3. Add News Route (UPDATED)
 router.post('/add', verifyAdmin, upload.single('image'), async (req, res) => {
@@ -268,6 +218,56 @@ router.post('/breaking-news', async (req, res) => {
         res.status(500).json({ message: "Error saving news", error: err });
     }
 });
+
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let news;
+
+    const mongoose = require('mongoose');
+
+    // 👇 check karo id hai ya slug
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      news = await News.findById(id).lean();
+    } else {
+      news = await News.findOne({ slug: id }).lean();
+    }
+
+    if (!news) {
+      return res.status(404).json({ message: "News not found" });
+    }
+
+    const User = require('../models/User');
+    const users = await User.find().lean();
+
+    const oldUserMap = {
+      "1": "Shiv Vishwakarma",
+      "9": "Shiv Vishwakarma"
+    };
+
+    let author_name = "Unknown";
+
+    if (oldUserMap[news.user_id]) {
+      author_name = oldUserMap[news.user_id];
+    } else {
+      const user = users.find(
+        u => u._id.toString() === news.user_id
+      );
+      author_name = user ? user.name : "Unknown";
+    }
+
+    res.json({
+      ...news,
+      author_name
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching news" });
+  }
+});
+
 
 
 

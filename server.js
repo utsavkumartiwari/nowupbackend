@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 app.use('/api/auth', authRoutes); 
 app.use('/api/news', newsRoutes); 
 app.use('/api/category', require('./routes/categoryRoutes'));
-app.use('/api/subcategory', require('./routes/subcategoryroute'));
+app.use('/api/subcategory', require('./routes/subCategoryRoutes'));
 app.use('/api', videoRoutes);
 app.use('/api/shorts', require('./routes/shortVideoRoutes'));
 mongoose.connect(process.env.MONGO_URI)

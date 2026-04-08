@@ -2,21 +2,8 @@ const express = require('express');
 const router = express.Router();
 const News = require('../models/News');
 const { verifyAdmin } = require('../middleware/auth');
-const multer = require('multer');
-const path = require('path');
 const BreakingNews = require('../models/BreakingNews');
-
-// 1. Image Storage Setup
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/news'); 
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = require('../middleware/upload');
 
 // 2. Fetch All News Route (Yeh 404 error fix karega)
 router.get('/all', async (req, res) => {
@@ -168,7 +155,7 @@ router.post('/add', verifyAdmin, upload.single('image'), async (req, res) => {
             meta_keyword: meta_keyword || '',
             meta_description: meta_description || '',
 
-            image: req.file ? req.file.filename : ''
+            image: req.file ? req.file.path : ''
         });
 
         await newNews.save();
@@ -192,7 +179,7 @@ router.put('/update/:id', verifyAdmin, upload.single('image'), async (req, res) 
         const updateData = { ...req.body };
 
         if (req.file) {
-            updateData.image = req.file.filename;
+            updateData.image = req.file.path;
         }
 
         const updatedNews = await News.findByIdAndUpdate(

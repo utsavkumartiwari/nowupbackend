@@ -167,7 +167,15 @@ router.post('/add', verifyAdmin, upload.single('image'), async (req, res) => {
             message: "News Saved Successfully!"
         });
 
-    } catch (err) {
+    catch (err) {
+
+        // ✅ Duplicate slug error handle
+        if (err.code === 11000) {
+            return res.status(400).json({
+                message: "Slug already exists, please use different slug"
+            });
+        }
+    
         res.status(500).json({
             message: "Database Error",
             error: err.message

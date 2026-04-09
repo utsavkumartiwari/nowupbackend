@@ -16,23 +16,11 @@ router.get('/all', async (req, res) => {
     };
 
     if (category) {
-      const Category = require('../models/Category');
-    
-      const cat = await Category.findOne({ slug_url: category });
-    
-      if (cat) {
-        filter.category_id = String(cat.id);
-      }
+      filter.category_id = String(category).trim();
     }
 
     if (subCategory) {
-      const SubCategory = require('../models/SubCategory');
-    
-      const sub = await SubCategory.findOne({ slug_url_subcat: subCategory });
-    
-      if (sub) {
-        filter.sub_category_id = String(sub.id);
-      }
+      filter.sub_category_id = String(subCategory).trim();
     }
 
     // 🔥 STEP 1: news lao

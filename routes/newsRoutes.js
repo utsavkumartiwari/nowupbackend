@@ -149,7 +149,7 @@ router.post('/add', verifyAdmin, upload.single('image'), async (req, res) => {
             tags: tags || '',
 
             // user_id: user_id || '',
-            user_id: req.user.id,
+            user_id: req.user?.id || "admin",
             status: status || '1',
 
             meta_keyword: meta_keyword || '',
@@ -157,6 +157,9 @@ router.post('/add', verifyAdmin, upload.single('image'), async (req, res) => {
 
             image: req.file ? req.file.path : ''
         });
+        console.log("REQ.USER:", req.user);
+        console.log("REQ.BODY:", req.body);
+        console.log("REQ.FILE:", req.file);
 
         await newNews.save();
 
